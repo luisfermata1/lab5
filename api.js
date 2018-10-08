@@ -76,10 +76,37 @@ app.post('/api/v1/pedido', function(req, res) {
     else
     {
         pedidos.pedidos.push(pedido);
-        res.writeHead(200, {"Content-Type": "application/json"});
-        res.write(JSON.stringify({status:"201 Add Success"}));
+        res.writeHead(200, {"Content-Type": "text/plain"});
+        res.write("201 Add Success");
         res.end();
     }  
+});
+
+//FUNCION PUT
+app.put("/api/v1/pedido/:id", (req, res) => {
+    var id = req.params.id;
+    var pedidos_unico = pedidos.pedidos.filter(x => x.id==id)
+    
+    if( pedidos_unico.length > 0 )
+    { 
+        for(var item in pedidos.pedidos)
+        {
+            if(pedidos.pedidos[item].id==id)
+            {
+                pedidos.pedidos[item] = req.body;
+            }
+        }
+        
+        res.writeHead(200, {"Content-Type": "text/plain"});
+        res.write("204 Update item");
+        res.end();
+    }
+    else
+    {
+        res.writeHead(404, {"Content-Type": "text/plain"});
+        res.write("404 Not found");
+        res.end();
+    }
 });
 
 //función para crear servidor
