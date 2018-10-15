@@ -10,31 +10,47 @@ var pedidos = {"pedidos":[
     { id: 3, nombre: 'iPhone7', cantidad: 3}
   ]};
 
+
+var MongoClient = require('mongodb').MongoClient;
+var ObjectId = require('mongodb').ObjectId;
+var db;
+var collection;
+
+MongoClient.connect("mongodb://localhost:27017", { useNewUrlParser: true, poolSize: 10 }).then(client => {
+    db = client.db('TiendaApple');
+    collection = db.collection('pedidos');
+}).catch(error => console.error(error));
+
 //Función Get
 app.get("/api/v1/pedido/:id?", (req, res) => {
     var id = req.params.id;
     if (id===undefined)
     {
         res.writeHead(200, {"Content-Type": "application/json"});
-        res.write(JSON.stringify(pedidos));
-        res.end();
+        collection.find({}).toArray().then(response => {
+			if (response.length > 0) {
+                res.write(JSON.stringify(response));
+                res.end();
+			} else {
+                res.sendStatus(404);
+                res.end();
+			}
+        }).catch(error => console.error(error));
+        
     }
     else
     {
-        var pedidos_unico = pedidos.pedidos.filter(x => x.id==id)
-        if( pedidos_unico.length>0 )
-        {
-            res.writeHead(200, {"Content-Type": "application/json"});
-            res.write(JSON.stringify(pedidos_unico));
-            res.end();  
-            
-        }
-        else
-        {
-            res.writeHead(404, {"Content-Type": "text/plain"});
-            res.write("404 Not found");
-            res.end();
-        }
+        
+        collection.find({_id : ObjectId(id)}).toArray().then(response => {
+			if (response.length > 0) {
+                res.writeHead(200, {"Content-Type": "application/json"});
+                res.write(JSON.stringify(response));
+                res.end();
+			} else {
+                res.writeHead(404, {"Content-Type": "text/plain"});
+                res.end();
+			}
+        }).catch(error => console.error(error));
         
     }
 });
