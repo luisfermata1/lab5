@@ -58,25 +58,13 @@ app.get("/api/v1/pedido/:id?", (req, res) => {
 //Función DELETE
 app.delete("/api/v1/pedido/:id", (req, res) => {
     var id = req.params.id;
-    var pedidos_unico = pedidos.pedidos.filter(x => x.id==id)
-    if( pedidos_unico.length>0 )
-    { 
-        var pedidos2 = [];
-        for(var i = 0; i < pedidos.pedidos.length; i++){
-            if(pedidos.pedidos[i].id != id)
-                pedidos2.push(pedidos.pedidos[i]);
-        }
-        pedidos.pedidos = pedidos2;
-        res.writeHead(200, {"Content-Type": "text/plain"});
-        res.write("200 Delete Succesfully");
-        res.end();
-    }
-    else
-    {
-        res.writeHead(404, {"Content-Type": "text/plain"});
-        res.write("404 Not found");
-        res.end();
-    }
+
+    collection.deleteOne({_id : ObjectId(id)}, function(err, res) {
+        if (err) throw err;
+    });
+    res.writeHead(200, {"Content-Type": "text/plain"});
+    res.write("200 Delete Succesfully");
+    res.end();
 });
 
 //FUNCIÓN POST
