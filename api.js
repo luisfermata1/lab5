@@ -82,20 +82,13 @@ app.delete("/api/v1/pedido/:id", (req, res) => {
 //FUNCIÓN POST
 app.post('/api/v1/pedido', function(req, res) {
     var pedido = req.body;
-    var pedidos_unico = pedidos.pedidos.filter(x => x.id===pedido.id);
-    if(pedidos_unico.length>0)
-    {
-        res.writeHead(409, {"Content-Type": "text/plain"});
-        res.write("409 Conflict Item already exist");
-        res.end();
-    }
-    else
-    {
-        pedidos.pedidos.push(pedido);
-        res.writeHead(200, {"Content-Type": "text/plain"});
-        res.write("201 Add Success");
-        res.end();
-    }  
+    collection.insertOne(pedido, function(err, res) {
+        if (err) throw err;
+      });
+
+    res.writeHead(200, {"Content-Type": "text/plain"});
+    res.write("201 Add Success");
+    res.end();
 });
 
 //FUNCION PUT
