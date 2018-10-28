@@ -21,6 +21,20 @@ MongoClient.connect("mongodb://localhost:27017", { useNewUrlParser: true, poolSi
     collection = db.collection('pedidos');
 }).catch(error => console.error(error));
 
+app.use(function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', req.get('Origin') || '*');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+    res.header('Access-Control-Expose-Headers', 'Content-Length');
+    res.header('Access-Control-Allow-Headers', 'Accept, Authorization, Content-Type, X-Requested-With, Range');
+    if (req.method === 'OPTIONS') {
+      // console.log(req);
+      return res.send(200);
+    } else {
+      return next();
+    }
+  });
+
 //Función Get
 app.get("/api/v1/pedido/:id?", (req, res) => {
     var id = req.params.id;
@@ -85,7 +99,7 @@ app.put("/api/v1/pedido/:id", (req, res) => {
     
     collection.updateOne(
         { _id: ObjectId(id)}, // Filter
-        {$set: { nombre: req.body.nombre, cantidad: req.body.cantidad}} // Update
+        {$set: { name: req.body.name, cant: req.body.cant, color: req.body.color, capac: req.body.capac, descr: req.body.descr}} // Update
     )
     .then(response => {
         res.writeHead(200, {"Content-Type": "text/plain"});
