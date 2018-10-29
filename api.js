@@ -1,6 +1,8 @@
 var express = require("express");
 var app = express();
 var bodyParser = require('body-parser');
+var redis = require("redis");
+var redis_client = redis.createClient();
 app.use(bodyParser.json()); 
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -113,6 +115,34 @@ app.put("/api/v1/pedido/:id", (req, res) => {
         res.end();
     });
 });
+
+
+                    //FUNCIONES REDIS
+
+//Realizar busquedas en redis
+function Buscar_redis(id)
+{
+    return new Promise(function(resolve,reject){
+        redis_client.get(id, function(error, result) {
+            if (error) reject('Error en la lectura redis');
+            else resolve(JSON.parse(result));
+        });
+    });
+}
+
+//insertar datos en redis
+function Insertar_redis(id,object)
+{
+    redis_client.set(id, JSON.stringify(object), redis.print);
+}
+
+//Borrar del redis
+function Borra_redis(id)
+{
+    redis_client.del(id);
+}
+
+
 
 //función para crear servidor
 function apiServer(){
