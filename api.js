@@ -56,25 +56,57 @@ app.get("/api/v1/pedido/:id?", (req, res) => {
     }
     else
     {
-        
-        collection.find({_id : ObjectId(id)}).toArray().then(response => {
-			if (response.length > 0) {
+        GetPedido(id).then(function(results) {
+            
+            if(results.length == 0)
+            {
+                res.writeHead(404, {"Content-Type": "application/json"});
+                res.write(JSON.stringify(results));
+                res.end();   
+            }
+            else
+            {
                 res.writeHead(200, {"Content-Type": "application/json"});
-                res.write(JSON.stringify(response));
+                res.write(JSON.stringify(results[0]));
                 res.end();
-			} else {
-                res.writeHead(404, {"Content-Type": "text/plain"});
-                res.end();
-			}
-        }).catch(error => console.error(error));
-        
+            }
+        })
     }
 });
+
+function GetPedido(id)
+{
+    return new Promise(function(resolve,reject){
+        //se verifica si el registro se encuentra en el redis, sino se busca en el mongo
+        Buscar_redis(id).then(function(redis_results){
+
+            if (redis_results === JSON.parse(null))
+            {
+                //no se encontro en le redis, por lo que hace una busqueda en BD
+                console.log("entro al de mongo");
+                collection.find({_id : ObjectId(id)}).toArray().then(response => {
+                    if (response.length > 0) {
+                        Insertar_redis(id,response[0]);
+                    } 
+                    resolve(response);
+
+                }).catch(error => console.error(error));
+            }
+            else
+            {
+                //la consulta se hace por medio de redis
+                console.log("entro al redis");
+                resolve([redis_results]);
+            }
+        });
+    })
+
+}
 
 //Función DELETE
 app.delete("/api/v1/pedido/:id", (req, res) => {
     var id = req.params.id;
-
+    Borra_redis(id);
     collection.deleteOne({_id : ObjectId(id)}, function(err, res) {
         if (err) throw err;
     });
@@ -98,7 +130,7 @@ app.post('/api/v1/pedido', function(req, res) {
 //FUNCION PUT
 app.put("/api/v1/pedido/:id", (req, res) => {
     var id = req.params.id;
-    
+    Borra_redis(id);
     collection.updateOne(
         { _id: ObjectId(id)}, // Filter
         {$set: { name: req.body.name, cant: req.body.cant, color: req.body.color, capac: req.body.capac, descr: req.body.descr}} // Update
