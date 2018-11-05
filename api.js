@@ -2,7 +2,7 @@ var express = require("express");
 var app = express();
 var bodyParser = require('body-parser');
 var redis = require("redis");
-var redis_client = redis.createClient();
+var redis_client = redis.createClient(process.env.url_redis_env);
 app.use(bodyParser.json()); 
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -18,7 +18,7 @@ var ObjectId = require('mongodb').ObjectId;
 var db;
 var collection;
 
-MongoClient.connect("mongodb://localhost:27017", { useNewUrlParser: true, poolSize: 10 }).then(client => {
+MongoClient.connect("mongodb://mongodb:27017", { useNewUrlParser: true, poolSize: 10 }).then(client => {
     db = client.db('TiendaApple');
     collection = db.collection('pedidos');
 }).catch(error => console.error(error));
