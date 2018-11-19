@@ -2,7 +2,7 @@ var express = require("express");
 var app = express();
 var bodyParser = require('body-parser');
 var redis = require("redis");
-var redis_client = redis.createClient(process.env.url_redis_env);
+var redis_client = redis.createClient(6379, 'redisdns.westus.azurecontainer.io');
 app.use(bodyParser.json()); 
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -18,7 +18,7 @@ var ObjectId = require('mongodb').ObjectId;
 var db;
 var collection;
 
-MongoClient.connect("mongodb://mongodb:27017", { useNewUrlParser: true, poolSize: 10 }).then(client => {
+MongoClient.connect("mongodb://mongodns.westus.azurecontainer.io:27017", { useNewUrlParser: true, poolSize: 10 }).then(client => {
     db = client.db('TiendaApple');
     collection = db.collection('pedidos');
 }).catch(error => console.error(error));
@@ -31,7 +31,7 @@ app.use(function(req, res, next) {
     res.header('Access-Control-Allow-Headers', 'Accept, Authorization, Content-Type, X-Requested-With, Range');
     if (req.method === 'OPTIONS') {
       // console.log(req);
-      return res.send(200);
+      return res.sendStatus(200);
     } else {
       return next();
     }
@@ -78,6 +78,7 @@ function GetPedido(id)
 {
     return new Promise(function(resolve,reject){
         //se verifica si el registro se encuentra en el redis, sino se busca en el mongo
+        console.log("trata entrar redis");
         Buscar_redis(id).then(function(redis_results){
 
             if (redis_results === JSON.parse(null))
@@ -98,7 +99,7 @@ function GetPedido(id)
                 console.log("entro al redis");
                 resolve([redis_results]);
             }
-        });
+        }).catch(error => console.error(error));
     })
 
 }
@@ -182,6 +183,22 @@ function apiServer(){
     console.log("Server running on port 3000");
     });
 }
+
+//ping a redis
+setInterval(function(){
+    //console.log("Entered to ping");
+    redis_client.ping(function (err, result){
+      if(result){
+        console.log("Redis pinged");
+      }
+
+      if(err){
+        console.log("There was an error " + err);
+      }
+    })
+
+  }, 6000)
+
 
 
 //ejecutar servidor
