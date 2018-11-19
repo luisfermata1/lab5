@@ -2,11 +2,7 @@ var express = require("express");
 var app = express();
 var bodyParser = require('body-parser');
 var redis = require("redis");
-<<<<<<< HEAD
 var redis_client = redis.createClient(6379, 'redisdns.westus.azurecontainer.io');
-=======
-var redis_client = redis.createClient(process.env.url_redis_env);
->>>>>>> 692bcd729fbd88cafb4737dee7fc43ef0bde1aaa
 app.use(bodyParser.json()); 
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -22,11 +18,8 @@ var ObjectId = require('mongodb').ObjectId;
 var db;
 var collection;
 
-<<<<<<< HEAD
 MongoClient.connect("mongodb://mongodns.westus.azurecontainer.io:27017", { useNewUrlParser: true, poolSize: 10 }).then(client => {
-=======
-MongoClient.connect("mongodb://mongodb:27017", { useNewUrlParser: true, poolSize: 10 }).then(client => {
->>>>>>> 692bcd729fbd88cafb4737dee7fc43ef0bde1aaa
+
     db = client.db('TiendaApple');
     collection = db.collection('pedidos');
 }).catch(error => console.error(error));
